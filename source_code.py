@@ -372,6 +372,7 @@ class CSP:
 def file_reader(file_name):
     puzzle = []
     file = open(file_name)
+    valid_inputs = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
     for ind in range(9):
         line = file.readline()
         row = line.split()
@@ -380,6 +381,8 @@ def file_reader(file_name):
     for row in range(len(puzzle)):
         for col in range(len(puzzle[row])):
             val_str = puzzle[row][col]
+            if val_str not in valid_inputs:
+                raise ValueError("Input must be an integer from 0 to 9")
             puzzle[row][col] = int(val_str)
     return puzzle
 
