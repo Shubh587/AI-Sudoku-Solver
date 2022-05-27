@@ -39,7 +39,7 @@ def get_input():
 
 
     # If a solution exists, display it. Otherwise, the input is invalid.
-    if solution[0] != -1:
+    if isSuccess:
         return render_template("solve.html", solution=solution)
     else:
         return render_template("unsolvable.html", solution=input)
