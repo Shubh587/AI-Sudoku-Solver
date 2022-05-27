@@ -27,13 +27,16 @@ def get_input():
     for i in range(len(spots)):
         for j in range(len(spots[i])):
             input[j][i] = (request.form[spots[i][j]])
+            if input[j][i] == '':
+                input[j][i] = 0
+            input[j][i] = int(input[j][i])
 
-    print(input)
     # Creating CSP object and calling backtracking algo
     csp = algorithm.CSP(input)
     assignment = algorithm.backtracking_search(csp)[1]
     isSuccess = algorithm.backtracking_search(csp)[0]
     solution = algorithm.convert_1D_array(input, assignment, isSuccess)
+
 
     # If a solution exists, display it. Otherwise, the input is invalid.
     if solution[0] != -1:
