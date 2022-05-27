@@ -12,20 +12,23 @@ def index():
 @app.route("/solve", methods=["POST", "GET"])
 def get_input():
     # Creating matrix of spots algorithmically
-    input = []
+    input = [[]]*9
     spots = [[]]*9
     y_axis = ['0', '1', '2', '3', '4', '5', '6', '7', '8']
     for i in range(len(spots)):
         spots[i] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
+        input[i] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
     for i in range(9):
         for j in range(len(spots[i])):
             spots[i][j] += y_axis[i]
+            input[i][j] += y_axis[i]
     
     # Getting input from user and storing in input matrix
     for i in range(len(spots)):
         for j in range(len(spots[i])):
-            input.append(request.form[spots[i][j]])
+            input[j][i] = (request.form[spots[i][j]])
 
+    print(input)
     # Creating CSP object and calling backtracking algo
     csp = algorithm.CSP(input)
     assignment = algorithm.backtracking_search(csp)[1]
