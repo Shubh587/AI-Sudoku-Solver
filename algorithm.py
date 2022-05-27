@@ -395,7 +395,6 @@ def apply_solution(puzzle, assignment):
         puzzle[var_row][var_col] = variable.get_value()
     print_puzzle(puzzle)
 
-
 def write_output_file(input_file_name, puzzle, assignment):
     input_num = int(input_file_name[5])
     output_file_name = f"Output{input_num}.txt"
@@ -405,11 +404,35 @@ def write_output_file(input_file_name, puzzle, assignment):
     apply_solution(puzzle, assignment)
 
 
+def convert_1D_array(puzzle, assignment, is_solvable):
+    solution = []
+    if is_solvable:
+        # Convert the assignment into a dictionary that holds the location of the variable and the given assigned value
+        var_assignments = {}
+        for ind in range(len(assignment)):
+            variable = assignment.get_assignments()[ind]
+            var_loc = variable.get_location()
+            var_val = variable.get_value()
+            var_assignments[var_loc] = var_val
+        for row in range(len(puzzle)):
+            for col in range(len(puzzle[row])):
+                val = puzzle[row][col]
+                if val == 0:  # we know an unassigned var is supposed to go here
+                    unassigned_var_val = var_assignments[row, col]
+                    solution.append(unassigned_var_val)
+                else:  # this is an assigned var
+                    solution.append(val)
+    else:  # the backtracking algorithm failed to solve the puzzle
+        solution = [-1] * 81
+    return solution
+
+
 def print_puzzle(puzzle):
     for row in range(len(puzzle)):
         for col in range(len(puzzle[row])):
             print(puzzle[row][col], end=" ")
         print()
+       
 
 
 def backtrack(csp, assignment):
@@ -468,12 +491,12 @@ def main():
     # Sends the csp into the backtracking search algorithm to get solved
     solution = backtracking_search(csp)
 
+    # outputs entire puzzle as a 1D array for the HTML program to process and output to the user
     is_success = solution[0]
-    if is_success:  # checks if the puzzle was solvable
-        assignment = solution[1]
-        write_output_file(file_name, sudoku_puzzle, assignment)  # writes the output file with the solved puzzle
-    else:  # the puzzle was not solvable given the user inputs
-        print("Failure. Puzzle is not solvable.")
+    assignment = solution[1]
+    output = convert_1D_array(sudoku_puzzle, assignment, is_success)
+
+    print(output)
 
 
 if __name__ == "__main__":
