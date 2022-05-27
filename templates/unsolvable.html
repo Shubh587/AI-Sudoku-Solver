@@ -1,0 +1,51 @@
+<!-- Dev: Sean Balakhanei -->
+<!DOCTYPE html>
+<html>
+    <head> 
+        <meta charset="UTF 8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sudoku Solver</title>
+        <link rel="stylesheet"
+        href="https://cdnjs.clourflare.com/ajax/libs/normalize/7.0.0/normalize.min.css">
+        <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css"
+        integrity="sha-256-46qynGAkLSFpVbEBog43gvNhfrOj+BmwXdxFgVK/Kvc=" crossorigin="anonymous" />
+
+        <!-- CSS file -->
+        <link rel="stylesheet" href="/static/style.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro:300,900|Source+Sans+Pro:300,900&display=swap">
+    </head>
+
+    <form class="grid", action="/solve", method="POST">
+        <!-- Puzzle board with text boxes -->
+        <div class="puzzle_unsolvable">
+            <table>
+                <caption class="title">Sudoku Solver</caption>
+                <colgroup><col><col><col>
+                <colgroup><col><col><col>
+                <colgroup><col><col><col>
+                <tbody>
+                <tr> <td>{{solution[0]}}</td> <td>{{solution[1]}}</td> <td>{{solution[2]}}</td> <td>{{solution[3]}}</td> <td>{{solution[4]}}</td> <td>{{solution[5]}}</td> <td>{{solution[6]}}</td> <td>{{solution[7]}}</td> <td>{{solution[8]}}</td>
+                <tr> <td>{{solution[9]}}</td> <td>{{solution[10]}}</td> <td>{{solution[11]}}</td> <td>{{solution[12]}}</td> <td>{{solution[13]}}</td> <td>{{solution[14]}}</td> <td>{{solution[15]}}</td> <td>{{solution[16]}}</td> <td>{{solution[17]}}</td>
+                <tr> <td>{{solution[18]}}</td> <td>{{solution[19]}}</td> <td>{{solution[20]}}</td> <td>{{solution[21]}}</td> <td>{{solution[22]}}</td> <td>{{solution[23]}}</td> <td>{{solution[24]}}</td> <td>{{solution[25]}}</td> <td>{{solution[26]}}</td>
+                <tbody>
+                <tr> <td>{{solution[27]}}</td> <td>{{solution[28]}}</td> <td>{{solution[29]}}</td> <td>{{solution[30]}}</td> <td>{{solution[31]}}</td> <td>{{solution[32]}}</td> <td>{{solution[33]}}</td> <td>{{solution[34]}}</td> <td>{{solution[35]}}</td>
+                <tr> <td>{{solution[36]}}</td> <td>{{solution[37]}}</td> <td>{{solution[38]}}</td> <td>{{solution[39]}}</td> <td>{{solution[40]}}</td> <td>{{solution[41]}}</td> <td>{{solution[42]}}</td> <td>{{solution[43]}}</td> <td>{{solution[44]}}</td>
+                <tr> <td>{{solution[45]}}</td> <td>{{solution[46]}}</td> <td>{{solution[47]}}</td> <td>{{solution[48]}}</td> <td>{{solution[49]}}</td> <td>{{solution[50]}}</td> <td>{{solution[51]}}</td> <td>{{solution[52]}}</td> <td>{{solution[53]}}</td>
+                <tbody>
+                <tr> <td>{{solution[54]}}</td> <td>{{solution[55]}}</td> <td>{{solution[56]}}</td> <td>{{solution[57]}}</td> <td>{{solution[58]}}</td> <td>{{solution[59]}}</td> <td>{{solution[60]}}</td> <td>{{solution[61]}}</td> <td>{{solution[62]}}</td>
+                <tr> <td>{{solution[63]}}</td> <td>{{solution[64]}}</td> <td>{{solution[65]}}</td> <td>{{solution[66]}}</td> <td>{{solution[67]}}</td> <td>{{solution[68]}}</td> <td>{{solution[69]}}</td> <td>{{solution[70]}}</td> <td>{{solution[71]}}</td>
+                <tr> <td>{{solution[72]}}</td> <td>{{solution[73]}}</td> <td>{{solution[74]}}</td> <td>{{solution[75]}}</td> <td>{{solution[76]}}</td> <td>{{solution[77]}}</td> <td>{{solution[78]}}</td> <td>{{solution[79]}}</td> <td>{{solution[80]}}</td>
+            </table>
+        </div>
+
+        <!-- Redirect Button -->
+        <a href="/">
+            <input type="button", value="Invalid Input", class="btn_unsolvable">
+        </a>
+
+    </form>
+
+</html>
