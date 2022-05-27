@@ -33,6 +33,7 @@ def get_input():
 
     # Creating CSP object and calling backtracking algo
     csp = algorithm.CSP(input)
+    csp.eliminate_domain_values()
     assignment = algorithm.backtracking_search(csp)[1]
     isSuccess = algorithm.backtracking_search(csp)[0]
     solution = algorithm.convert_1D_array(input, assignment, isSuccess)
