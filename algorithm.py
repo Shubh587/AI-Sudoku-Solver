@@ -362,6 +362,52 @@ class CSP:
                     self.unassigned_vars[len(self.unassigned_vars) - 1], self.unassigned_vars[var_ind]
         self.unassigned_vars.pop()
 
+    def enough_clues(self):
+        zero_count = 0
+        for row in self.rows.keys():
+            row_variables = self.rows[row]
+            for ind in range(len(row_variables)):
+                val = row_variables[ind].get_value()
+                if val == 0:
+                    zero_count += 1
+        if 0 <= zero_count <= 16:
+            return False
+        return True
+
+    def is_viable(self):
+        # Check if the puzzle is empty or has enough clues to even solve the puzzle
+        if not self.enough_clues():
+            return False
+        # Check every row in initial puzzle to see if there are any invalid cases
+        for row in self.rows.keys():
+            row_variables = self.rows[row]
+            row_values = [row_variables[var_ind].get_value() for var_ind in range(len(row_variables))]
+            row_values.sort()  # sort the list of values in the row in ascending order
+            for ind in range(len(row_values) - 1):
+                val = row_values[ind]
+                next_val = row_values[ind + 1]
+                if val == next_val:
+                    return False
+        for col in self.columns.keys():
+            col_variables = self.columns[col]
+            col_values = [col_variables[var_ind].get_value() for var_ind in range(len(col_variables))]
+            col_values.sort()  # sort the list of values in the row in ascending order
+            for ind in range(len(col_values) - 1):
+                val = col_values[ind]
+                next_val = col_values[ind + 1]
+                if val == next_val:
+                    return False
+        for block in self.blocks.keys():
+            block_variables = self.blocks[block]
+            block_values = [block_variables[var_ind].get_value() for var_ind in range(len(block_variables))]
+            block_values.sort()  # sort the list of values in the row in ascending order
+            for ind in range(len(block_values) - 1):
+                val = block_values[ind]
+                next_val = block_values[ind + 1]
+                if val == next_val:
+                    return False
+        return True
+
     def add_unassigned_var(self, unassigned_var):
         self.unassigned_vars.append(unassigned_var)
 
@@ -480,22 +526,26 @@ def main():
     # Outputs the sudoku problem (before it is solved) to the terminal
     print("Input: ")
     print_puzzle(sudoku_puzzle)
+    print(sudoku_puzzle)
     print()
 
     # Creates the constraint solve problem given the sudoku puzzle array
     csp = CSP(sudoku_puzzle)
 
-    # Removes invalid domain values that conflict with assigned variables from each unassigned variable
-    csp.eliminate_domain_values()
+    # Checks if the initial puzzle given is viable
+    if csp.is_viable():
+        # Removes invalid domain values that conflict with assigned variables from each unassigned variable
+        csp.eliminate_domain_values()
 
-    # Sends the csp into the backtracking search algorithm to get solved
-    solution = backtracking_search(csp)
+        # Sends the csp into the backtracking search algorithm to get solved
+        solution = backtracking_search(csp)
+        is_success = solution[0]
 
-    # outputs entire puzzle as a 1D array for the HTML program to process and output to the user
-    is_success = solution[0]
-    assignment = solution[1]
-    output = convert_1D_array(sudoku_puzzle, assignment, is_success)
-
+        # outputs entire puzzle as a 1D array for the HTML program to process and output to the user
+        assignment = solution[1]
+        output = convert_1D_array(sudoku_puzzle, assignment, is_success)
+    else:
+        output = [-1] * 81
     print(output)
 
 
