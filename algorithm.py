@@ -41,18 +41,10 @@ class Variable:
         return "(" + str(self.location[0]) + ", " + str(self.location[1]) + ") = " + str(self.value)
 
     def __eq__(self, other):  # Returns true if the two variables have the same location (row and column) in the puzzle
-        self_row = self.location[0]
-        self_col = self.location[1]
-        other_row = other.location[0]
-        other_col = other.location[1]
-        return self_row == other_row and self_col == other_col
+        return self.location[0] == other.location[0] and self.location[1] == other.location[1]
 
     def __ne__(self, other):  # Returns true if the are not in the same location
-        self_row = self.location[0]
-        self_col = self.location[1]
-        other_row = other.location[0]
-        other_col = other.location[1]
-        return self_row != other_row or self_col != other_col
+        return self.location[0] != other.location[0] or self.location[1] != other.location[1]
 
     def find_block_number(self):  # uses the row and column to assign a block number to a variable
         row = self.location[0]
