@@ -33,15 +33,17 @@ def get_input():
 
     # Creating CSP object and calling backtracking algo
     csp = algorithm.CSP(input)
-    csp.eliminate_domain_values()
-    assignment = algorithm.backtracking_search(csp)[1]
-    isSuccess = algorithm.backtracking_search(csp)[0]
-    solution = algorithm.convert_1D_array(input, assignment, isSuccess)
+    if csp.is_viable():  # checks if the puzzle given can produce a viable, unique solution
+        csp.eliminate_domain_values()
+        assignment = algorithm.backtracking_search(csp)[1]
+        isSuccess = algorithm.backtracking_search(csp)[0]
+        solution = algorithm.convert_1D_array(input, assignment, isSuccess)
 
-
-    # If a solution exists, display it. Otherwise, the input is invalid.
-    if isSuccess:
-        return render_template("solve.html", solution=solution)
+        # If a solution exists, display it. Otherwise, the input is invalid.
+        if isSuccess:
+            return render_template("solve.html", solution=solution)
+        else:
+            return render_template("unsolvable.html", solution=input)
     else:
         return render_template("unsolvable.html", solution=input)
 
