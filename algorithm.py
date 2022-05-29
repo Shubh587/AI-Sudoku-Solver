@@ -1,7 +1,6 @@
 #!/usr/bin/python3
-# Author: Shubh Savani
-# Date Due: 05/12/22
-# Date Submitted: 05/24/22
+# Developer: Shubh Savani
+
 
 import argparse  # so we can parse the command line
 import sys  # so we can write the output file
@@ -33,18 +32,33 @@ class Variable:
     def update_value(self, new_value):
         self.value = new_value
 
-    def update_domain(self, value):
+    def prune_domain(self, value):
         self.domain.remove(value)
+
+    def set_domain(self, new_domain):
+        self.domain = new_domain
+
+    def add_domain_val(self, value):
+        self.domain.append(value)  # appends the value to the end of the list
+        self.domain.sort()  # sorts the list in increasing order from 1 - 9
 
     # Auxiliary methods
     def __str__(self):
         return "(" + str(self.location[0]) + ", " + str(self.location[1]) + ") = " + str(self.value)
 
     def __eq__(self, other):  # Returns true if the two variables have the same location (row and column) in the puzzle
-        return self.location[0] == other.location[0] and self.location[1] == other.location[1]
+        self_row = self.location[0]
+        self_col = self.location[1]
+        other_row = other.location[0]
+        other_col = other.location[1]
+        return self_row == other_row and self_col == other_col
 
     def __ne__(self, other):  # Returns true if the are not in the same location
-        return self.location[0] != other.location[0] or self.location[1] != other.location[1]
+        self_row = self.location[0]
+        self_col = self.location[1]
+        other_row = other.location[0]
+        other_col = other.location[1]
+        return self_row != other_row or self_col != other_col
 
     def find_block_number(self):  # uses the row and column to assign a block number to a variable
         row = self.location[0]
@@ -182,6 +196,14 @@ class Assignment:  # manages the list of assignments given to each variable duri
                 if past_assignment_val == var_val:
                     return False
         return True
+
+    def is_Assigned(self, variable):
+        # Traverse through each variable in assignments and return True if the given variable is already assigned
+        for ind in range(len(self.assignments)):
+            assigned_var = self.assignments[ind]
+            if variable == assigned_var:
+                return True
+        return False
 
     def __str__(self):
         output = ""
@@ -337,7 +359,7 @@ class CSP:
                     assigned_var_value = assigned_var.get_value()
                     unassigned_var_domain = unassigned_var.get_domain()
                     if assigned_var_value in unassigned_var_domain:
-                        unassigned_var.update_domain(assigned_var_value)
+                        unassigned_var.prune_domain(assigned_var_value)
 
     def minimum_remaining_values(self):
         domains_ordered = {1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: []}
@@ -354,57 +376,60 @@ class CSP:
                     self.unassigned_vars[len(self.unassigned_vars) - 1], self.unassigned_vars[var_ind]
         self.unassigned_vars.pop()
 
-    def enough_clues(self):
-        zero_count = 0
-        for row in self.rows.keys():
-            row_variables = self.rows[row]
-            for ind in range(len(row_variables)):
-                val = row_variables[ind].get_value()
-                if val == 0:
-                    zero_count += 1
-        if 0 <= zero_count <= 16:
-            return False
-        return True
+    def forward_checking(self, unassigned_var, assignment):
+        unassigned_var_val = unassigned_var.get_value()
+        constraints = self.constraint_collection.find_var_constraints(unassigned_var)
+        inferences = {}  # holds all the variables and their new domains due to pruning
+        for ind in range(len(constraints)):
+            constraint = constraints[ind]
+            constraint_vars = constraint.get_variables()
+            for var_ind in range(len(constraint_vars)):
+                variable = constraint_vars[var_ind]
+                var_domain = variable.get_domain()
+                var_location = variable.get_location()
+                pruned_vals = []
+                # so that the real domain is not effected until the inferences are applied in the backtracking algo
+                if not assignment.is_Assigned(variable):
+                    if unassigned_var != variable:
+                        if unassigned_var_val not in var_domain:
+                            pruned_vals.append(unassigned_var_val)
+                            if len(var_domain) == 1:  # checks if we would prune the last val and result to a failure
+                                return False, inferences  # the value assignment to this unassigned variable failed
+                            inferences[var_location] = pruned_vals
+        return True, inferences
 
-    def is_viable(self):
-        # Check if the puzzle is empty or has enough clues to even solve the puzzle
-        if not self.enough_clues():
-            return False
-        # Check every row in initial puzzle to see if there are any invalid cases
-        for row in self.rows.keys():
-            row_variables = self.rows[row]
-            row_values = [row_variables[var_ind].get_value() for var_ind in range(len(row_variables))]
-            row_values.sort()  # sort the list of values in the row in ascending order
-            for ind in range(len(row_values) - 1):
-                val = row_values[ind]
-                next_val = row_values[ind + 1]
-                if val == next_val:
-                    return False
-        for col in self.columns.keys():
-            col_variables = self.columns[col]
-            col_values = [col_variables[var_ind].get_value() for var_ind in range(len(col_variables))]
-            col_values.sort()  # sort the list of values in the row in ascending order
-            for ind in range(len(col_values) - 1):
-                val = col_values[ind]
-                next_val = col_values[ind + 1]
-                if val == next_val:
-                    return False
-        for block in self.blocks.keys():
-            block_variables = self.blocks[block]
-            block_values = [block_variables[var_ind].get_value() for var_ind in range(len(block_variables))]
-            block_values.sort()  # sort the list of values in the row in ascending order
-            for ind in range(len(block_values) - 1):
-                val = block_values[ind]
-                next_val = block_values[ind + 1]
-                if val == next_val:
-                    return False
-        return True
+    def find_unassigned_var(self, var_location):
+        for ind in range(len(self.unassigned_vars)):
+            unassigned_var = self.unassigned_vars[ind]
+            unassigned_var_loc = unassigned_var.get_location()
+            unassigned_var_row = unassigned_var_loc[0]
+            unassigned_var_col = unassigned_var_loc[1]
+            if unassigned_var_row == var_location[0] and unassigned_var_col == var_location[1]:
+                return unassigned_var
+        return None
+
+    def apply_inferences(self, inferences):
+        connected_vars_locations = inferences.keys()
+        for var_loc_ind in range(len(connected_vars_locations)):
+            var_loc = connected_vars_locations[var_loc_ind]
+            connected_var = self.find_unassigned_var(var_loc)
+            if connected_var is not None:
+                pruned_vals = inferences[var_loc]
+                for val in pruned_vals:
+                    connected_var.prune_domain(val)
+
+    def reverse_inferences(self, inferences):
+        connected_vars_locations = inferences.keys()
+        for var_loc_ind in range(len(connected_vars_locations)):
+            var_loc = connected_vars_locations[var_loc_ind]
+            connected_var = self.find_unassigned_var(var_loc)
+            if connected_var is not None:
+                pruned_vals = inferences[var_loc]
+                for val in pruned_vals:
+                    connected_var.add_domain_val(val)
 
     def add_unassigned_var(self, unassigned_var):
         self.unassigned_vars.append(unassigned_var)
-
-
-# Parsing CSP Arc ----------------------------------------------------------------------------------------------------
 
 
 def file_reader(file_name):
@@ -415,13 +440,14 @@ def file_reader(file_name):
         line = file.readline()
         row = line.split()
         puzzle.append(row)
-    # convert each value in puzzle from a string to an integer
+    #  convert each value in puzzle from a string to an integer
     for row in range(len(puzzle)):
         for col in range(len(puzzle[row])):
             val_str = puzzle[row][col]
             if val_str not in valid_inputs:
                 raise ValueError("Input must be an integer from 0 to 9")
             puzzle[row][col] = int(val_str)
+
     return puzzle
 
 
@@ -432,6 +458,7 @@ def apply_solution(puzzle, assignment):
         var_col = variable.get_location()[1]
         puzzle[var_row][var_col] = variable.get_value()
     print_puzzle(puzzle)
+
 
 def write_output_file(input_file_name, puzzle, assignment):
     input_num = int(input_file_name[5])
@@ -470,10 +497,109 @@ def print_puzzle(puzzle):
         for col in range(len(puzzle[row])):
             print(puzzle[row][col], end=" ")
         print()
-       
 
 
-def backtrack(csp, assignment):
+def parse_rows(puzzle):
+    rows = {}
+    for row in range(len(puzzle)):
+        rows[row] = [puzzle[row][col] for col in range(len(puzzle[row])) if puzzle[row][col] != 0]
+    return rows
+
+
+def parse_cols(puzzle):
+    cols = {}
+    for col in range(len(puzzle)):
+        cols[col] = [puzzle[row][col] for row in range(len(puzzle[col])) if puzzle[row][col] != 0]
+    return cols
+
+
+def parse_blocks(puzzle):
+    blocks = {0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: []}
+    for row in range(len(puzzle)):
+        for col in range(len(puzzle[row])):
+            value = puzzle[row][col]
+            if value != 0:
+                block_num = None
+                if 0 <= row <= 2:
+                    if 0 <= col <= 2:
+                        block_num = 0
+                    elif 3 <= col <= 5:
+                        block_num = 1
+                    elif 6 <= col <= 8:
+                        block_num = 2
+                elif 3 <= row <= 5:
+                    if 0 <= col <= 2:
+                        block_num = 3
+                    elif 3 <= col <= 5:
+                        block_num = 4
+                    elif 6 <= col <= 8:
+                        block_num = 5
+                else:
+                    if 0 <= col <= 2:
+                        block_num = 6
+                    elif 3 <= col <= 5:
+                        block_num = 7
+                    elif 6 <= col <= 8:
+                        block_num = 8
+                blocks[block_num].append(value)
+    return blocks
+
+
+def given_enough_clues(puzzle):
+    num_clues = 0
+    for row in range(len(puzzle)):
+        for col in range(len(puzzle[row])):
+            value = puzzle[row][col]
+            if value != 0:
+                num_clues += 1
+    print(num_clues)
+    if 0 <= num_clues <= 16:
+        return False
+    return True
+
+
+def is_viable(puzzle):
+    if not given_enough_clues(puzzle):  # check if there are enough clues given for the algo to solve
+        print("1")
+        return False
+    rows = parse_rows(puzzle)
+    cols = parse_cols(puzzle)
+    blocks = parse_blocks(puzzle)
+
+    # check every unit to make sure there are no invalid inputs
+    for row_ind in rows.keys():
+        row = rows[row_ind]
+        row.sort()
+        for ind in range(len(row) - 1):
+            curr_val = row[ind]
+            next_val = row[ind + 1]
+            if curr_val == next_val:
+                print("Curr Val", curr_val)
+                print("Next val", next_val)
+                return False
+    for col_ind in cols.keys():
+        col = cols[col_ind]
+        col.sort()
+        for ind in range(len(col) - 1):
+            curr_val = col[ind]
+            next_val = col[ind + 1]
+            if curr_val == next_val:
+                print("3")
+                return False
+    for block_ind in blocks.keys():
+        block = blocks[block_ind]
+        block.sort()
+        for ind in range(len(block) - 1):
+            curr_val = block[ind]
+            next_val = block[ind + 1]
+            if curr_val == next_val:
+                print("4")
+                return False
+    print("5")
+    return True
+
+
+def backtrack(csp, assignment):  # basic version (no forward checking)
     if len(assignment) == len(csp):  # checks if the assignment is complete
         return True, assignment
     var = csp.select_unassigned_var()
@@ -521,11 +647,10 @@ def main():
     print(sudoku_puzzle)
     print()
 
-    # Creates the constraint solve problem given the sudoku puzzle array
-    csp = CSP(sudoku_puzzle)
-
     # Checks if the initial puzzle given is viable
-    if csp.is_viable():
+    if is_viable(sudoku_puzzle):
+        # Creates the constraint solve problem given the sudoku puzzle array
+        csp = CSP(sudoku_puzzle)
         # Removes invalid domain values that conflict with assigned variables from each unassigned variable
         csp.eliminate_domain_values()
 
@@ -538,7 +663,6 @@ def main():
         output = convert_1D_array(sudoku_puzzle, assignment, is_success)
     else:
         output = [-1] * 81
-    print(output)
 
 
 if __name__ == "__main__":
