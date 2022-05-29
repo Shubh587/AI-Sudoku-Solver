@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Developer: Shubh Savani
+# Author: Shubh Savani
 
 
 import argparse  # so we can parse the command line
@@ -552,7 +552,6 @@ def given_enough_clues(puzzle):
             value = puzzle[row][col]
             if value != 0:
                 num_clues += 1
-    print(num_clues)
     if 0 <= num_clues <= 16:
         return False
     return True
@@ -560,7 +559,6 @@ def given_enough_clues(puzzle):
 
 def is_viable(puzzle):
     if not given_enough_clues(puzzle):  # check if there are enough clues given for the algo to solve
-        print("1")
         return False
     rows = parse_rows(puzzle)
     cols = parse_cols(puzzle)
@@ -574,8 +572,6 @@ def is_viable(puzzle):
             curr_val = row[ind]
             next_val = row[ind + 1]
             if curr_val == next_val:
-                print("Curr Val", curr_val)
-                print("Next val", next_val)
                 return False
     for col_ind in cols.keys():
         col = cols[col_ind]
@@ -584,7 +580,6 @@ def is_viable(puzzle):
             curr_val = col[ind]
             next_val = col[ind + 1]
             if curr_val == next_val:
-                print("3")
                 return False
     for block_ind in blocks.keys():
         block = blocks[block_ind]
@@ -593,9 +588,7 @@ def is_viable(puzzle):
             curr_val = block[ind]
             next_val = block[ind + 1]
             if curr_val == next_val:
-                print("4")
                 return False
-    print("5")
     return True
 
 
@@ -648,7 +641,8 @@ def main():
     print()
 
     # Checks if the initial puzzle given is viable
-    if is_viable(sudoku_puzzle):
+    is_possible = is_viable(sudoku_puzzle)
+    if is_possible:
         # Creates the constraint solve problem given the sudoku puzzle array
         csp = CSP(sudoku_puzzle)
         # Removes invalid domain values that conflict with assigned variables from each unassigned variable
