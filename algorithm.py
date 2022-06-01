@@ -1,6 +1,5 @@
 #!/usr/bin/python3
-# Author: Shubh Savani
-
+# Developer: Shubh Savani
 
 import argparse  # so we can parse the command line
 import sys  # so we can write the output file
@@ -377,8 +376,14 @@ class CSP:
         self.unassigned_vars.pop()
 
     def forward_checking(self, unassigned_var, assignment):
+        # print("X: ", unassigned_var)
+        # print()
         unassigned_var_val = unassigned_var.get_value()
         constraints = self.constraint_collection.find_var_constraints(unassigned_var)
+        # print("X's Constraints: ")
+        # for ind in range(len(constraints)):
+        #     print(constraints[ind])
+        # print()
         inferences = {}  # holds all the variables and their new domains due to pruning
         for ind in range(len(constraints)):
             constraint = constraints[ind]
@@ -388,12 +393,15 @@ class CSP:
                 var_domain = variable.get_domain()
                 var_location = variable.get_location()
                 pruned_vals = []
-                # so that the real domain is not effected until the inferences are applied in the backtracking algo
                 if not assignment.is_Assigned(variable):
                     if unassigned_var != variable:
-                        if unassigned_var_val not in var_domain:
+                        if unassigned_var_val in var_domain:
                             pruned_vals.append(unassigned_var_val)
+                            # print("Y: ", variable)
+                            # print("Y's Domain: ", var_domain)
+                            # print()
                             if len(var_domain) == 1:  # checks if we would prune the last val and result to a failure
+                                #  print("Here")
                                 return False, inferences  # the value assignment to this unassigned variable failed
                             inferences[var_location] = pruned_vals
         return True, inferences
@@ -410,8 +418,7 @@ class CSP:
 
     def apply_inferences(self, inferences):
         connected_vars_locations = inferences.keys()
-        for var_loc_ind in range(len(connected_vars_locations)):
-            var_loc = connected_vars_locations[var_loc_ind]
+        for var_loc in connected_vars_locations:
             connected_var = self.find_unassigned_var(var_loc)
             if connected_var is not None:
                 pruned_vals = inferences[var_loc]
@@ -420,8 +427,7 @@ class CSP:
 
     def reverse_inferences(self, inferences):
         connected_vars_locations = inferences.keys()
-        for var_loc_ind in range(len(connected_vars_locations)):
-            var_loc = connected_vars_locations[var_loc_ind]
+        for var_loc in connected_vars_locations:
             connected_var = self.find_unassigned_var(var_loc)
             if connected_var is not None:
                 pruned_vals = inferences[var_loc]
@@ -592,7 +598,33 @@ def is_viable(puzzle):
     return True
 
 
-def backtrack(csp, assignment):  # basic version (no forward checking)
+# def backtrack(csp, assignment):  # basic version (no forward checking)
+#     if len(assignment) == len(csp):  # checks if the assignment is complete
+#         return True, assignment
+#     var = csp.select_unassigned_var()
+#     if var is None:  # if None is returned from select_unassigned_var, then all the vars must be assigned
+#         return True, assignment
+#     var_domain = var.get_domain()
+#     for domain_value in var_domain:  # rotates through each domain value until the right one is
+#         # consistent with the other assignments
+#         var.update_value(domain_value)  # sets the variable to its new value
+#         if assignment.is_Consistent(var, csp.get_constraint_collection()):  # checks if the variable is consistent
+#             # with the other assigned variables
+#             assignment.add_assignment(var)  # if so, then the variable is added to the assignment object
+#             csp.remove_unassigned_var(var)  # the variable is also removed from the list of unassigned_vars
+#             # so that the select_unassigned_var() method does not pick this var again (unless added back in again)
+#             result = backtrack(csp, assignment)  # recursively calls backtracking algorithm with new assignment
+#             if result[0]:  # if the recursive call is successful/true,
+#                 # then the result will be sent back up in the recursive calls
+#                 return result
+#             assignment.remove_assignment(var)  # if the recursive call fails, then the var is removed
+#             # from the assignment obj
+#             var.update_value(0)  # the variable is reset back to 0
+#             csp.add_unassigned_var(var)  # the variable is added back to the list of unassigned variables
+#     return False, assignment  # if none of the domain values are consistent with the past variable assignments
+#
+
+def backtrack(csp, assignment):
     if len(assignment) == len(csp):  # checks if the assignment is complete
         return True, assignment
     var = csp.select_unassigned_var()
@@ -607,10 +639,16 @@ def backtrack(csp, assignment):  # basic version (no forward checking)
             assignment.add_assignment(var)  # if so, then the variable is added to the assignment object
             csp.remove_unassigned_var(var)  # the variable is also removed from the list of unassigned_vars
             # so that the select_unassigned_var() method does not pick this var again (unless added back in again)
-            result = backtrack(csp, assignment)  # recursively calls backtracking algorithm with new assignment
-            if result[0]:  # if the recursive call is successful/true,
-                # then the result will be sent back up in the recursive calls
-                return result
+            inferences = csp.forward_checking(var, assignment)
+            # print(inferences)
+            # print()
+            if inferences[0]:  # checks if the forward checking inference failed or not
+                csp.apply_inferences(inferences[1])  # apply the forward checking inferences to CSP
+                result = backtrack(csp, assignment)  # recursively calls backtracking algorithm with new assignment
+                if result[0]:  # if the recursive call is successful/true,
+                    # then the result will be sent back up in the recursive calls
+                    return result
+                csp.reverse_inferences(inferences[1])  # the inferences failed and need to be removed from CSP
             assignment.remove_assignment(var)  # if the recursive call fails, then the var is removed
             # from the assignment obj
             var.update_value(0)  # the variable is reset back to 0
@@ -637,18 +675,16 @@ def main():
     # Outputs the sudoku problem (before it is solved) to the terminal
     print("Input: ")
     print_puzzle(sudoku_puzzle)
-    print(sudoku_puzzle)
     print()
 
     # Checks if the initial puzzle given is viable
-    is_possible = is_viable(sudoku_puzzle)
-    if is_possible:
+    if is_viable(sudoku_puzzle):
         # Creates the constraint solve problem given the sudoku puzzle array
         csp = CSP(sudoku_puzzle)
         # Removes invalid domain values that conflict with assigned variables from each unassigned variable
         csp.eliminate_domain_values()
 
-        # Sends the csp into the backtracking search algorithm to get solved
+        # Send the csp into the backtracking search algorithm to get solved
         solution = backtracking_search(csp)
         is_success = solution[0]
 
@@ -657,6 +693,21 @@ def main():
         output = convert_1D_array(sudoku_puzzle, assignment, is_success)
     else:
         output = [-1] * 81
+    print(output)
+
+    # if is_viable(sudoku_puzzle):
+    #     csp = CSP(sudoku_puzzle)
+    #     csp.eliminate_domain_values()
+    #     solution = backtracking_search(csp)
+    #     is_success = solution[0]
+    #
+    #     if is_success:  # checks if the puzzle was solvable
+    #         assignment = solution[1]
+    #         write_output_file(file_name, sudoku_puzzle, assignment)  # writes the output file with the solved puzzle
+    #     else:  # the puzzle was not solvable given the user inputs
+    #         print("Failure. Puzzle is not solvable.")
+    # else:
+    #     print("Failure. Puzzle is not solvable.")
 
 
 if __name__ == "__main__":
