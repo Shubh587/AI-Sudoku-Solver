@@ -1,0 +1,100 @@
+<!-- Dev: Sean Balakhanei -->
+<!DOCTYPE html>
+<html>
+    <head> 
+        <meta charset="UTF 8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sudoku Solver</title>
+        <link rel="stylesheet"
+        href="https://cdnjs.clourflare.com/ajax/libs/normalize/7.0.0/normalize.min.css">
+
+        <!-- CSS file -->
+        <link rel="stylesheet" href="/static/style.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro:300,900|Source+Sans+Pro:300,900&display=swap">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    </head>
+
+    <form class="grid", action="/solve", method="POST">
+        <!-- Puzzle board with input boxes -->
+        <div class="puzzle">
+            <table>
+                <caption class="title">Sudoku Solver</caption>
+                <colgroup><col><col><col>
+                <colgroup><col><col><col>
+                <colgroup><col><col><col>
+                <tbody>
+                <tr> <td><input class="input_box" type="number", name="A0", id="A0", max="9"></td> <td><input class="input_box" type="number", name="A1", id="A1", max="9"></td><td><input class="input_box" type="number", name="A2", id="A2", max="9"></td><td><input class="input_box" type="number", name="A3", id="A3", max="9", value="5"></td><td><input class="input_box" type="number", name="A4", id="A4", max="9", value="6"></td><td><input class="input_box" type="number", name="A5", id="A5", max="9"></td><td><input class="input_box" type="number", name="A6", id="A6", max="9", value="7"></td><td><input class="input_box" type="number", name="A7", id="A7", max="9"></td><td><input class="input_box" type="number", name="A8", id="A8", max="9", value="4"></td>
+                <tr> <td><input class="input_box" type="number", name="B0", id="B0", max="9", value="6"></td> <td><input class="input_box" type="number", name="B1", id="B1", max="9", value="8"></td><td><input class="input_box" type="number", name="B2", id="B2", max="9"></td><td><input class="input_box" type="number", name="B3", id="B3", max="9"></td><td><input class="input_box" type="number", name="B4", id="B4", max="9", value="7"></td><td><input class="input_box" type="number", name="B5", id="B5", max="9"></td><td><input class="input_box" type="number", name="B6", id="B6", max="9"></td><td><input class="input_box" type="number", name="B7", id="B7", max="9", value="9"></td><td><input class="input_box" type="number", name="B8", id="B8", max="9"></td>
+                <tr> <td><input class="input_box" type="number", name="C0", id="C0", max="9", value="4"></td> <td><input class="input_box" type="number", name="C1", id="C1", max="9", value="9"></td><td><input class="input_box" type="number", name="C2", id="C2", max="9"></td><td><input class="input_box" type="number", name="C3", id="C3", max="9"></td><td><input class="input_box" type="number", name="C4", id="C4", max="9"></td><td><input class="input_box" type="number", name="C5", id="C5", max="9", value="1"></td><td><input class="input_box" type="number", name="C6", id="C6", max="9", value="2"></td><td><input class="input_box" type="number", name="C7", id="C7", max="9"></td><td><input class="input_box" type="number", name="C8", id="C8", max="9"></td>
+                <tbody>
+                <tr> <td><input class="input_box" type="number", name="D0", id="D0", max="9", value="8"></td> <td><input class="input_box" type="number", name="D1", id="D1", max="9", value="5"></td><td><input class="input_box" type="number", name="D2", id="D2", max="9"></td><td><input class="input_box" type="number", name="D3", id="D3", max="9", value="4"></td><td><input class="input_box" type="number", name="D4", id="D4", max="9"></td><td><input class="input_box" type="number", name="D5", id="D5", max="9"></td><td><input class="input_box" type="number", name="D6", id="D6", max="9"></td><td><input class="input_box" type="number", name="D7", id="D7", max="9", value="1"></td><td><input class="input_box" type="number", name="D8", id="D8", max="9"></td>
+                <tr> <td><input class="input_box" type="number", name="E0", id="E0", max="9"></td> <td><input class="input_box" type="number", name="E1", id="E1", max="9"></td><td><input class="input_box" type="number", name="E2", id="E2", max="9", value="1"></td><td><input class="input_box" type="number", name="E3", id="E3", max="9", value="6"></td><td><input class="input_box" type="number", name="E4", id="E4", max="9"></td><td><input class="input_box" type="number", name="E5", id="E5", max="9", value="5"></td><td><input class="input_box" type="number", name="E6", id="E6", max="9", value="9"></td><td><input class="input_box" type="number", name="E7", id="E7", max="9"></td><td><input class="input_box" type="number", name="E8", id="E8", max="9"></td>
+                <tr> <td><input class="input_box" type="number", name="F0", id="F0", max="9"></td> <td><input class="input_box" type="number", name="F1", id="F1", max="9", value="2"></td><td><input class="input_box" type="number", name="F2", id="F2", max="9"></td><td><input class="input_box" type="number", name="F3", id="F3", max="9"></td><td><input class="input_box" type="number", name="F4", id="F4", max="9"></td><td><input class="input_box" type="number", name="F5", id="F5", max="9", value="3"></td><td><input class="input_box" type="number", name="F6", id="F6", max="9"></td><td><input class="input_box" type="number", name="F7", id="F7", max="9", value="5"></td><td><input class="input_box" type="number", name="F8", id="F8", max="9", value="8"></td>
+                <tbody>
+                <tr> <td><input class="input_box" type="number", name="G0", id="G0", max="9"></td> <td><input class="input_box" type="number", name="G1", id="G1", max="9"></td><td><input class="input_box" type="number", name="G2", id="G2", max="9", value="9"></td><td><input class="input_box" type="number", name="G3", id="G3", max="9", value="3"></td><td><input class="input_box" type="number", name="G4", id="G4", max="9"></td><td><input class="input_box" type="number", name="G5", id="G5", max="9"></td><td><input class="input_box" type="number", name="G6", id="G6", max="9"></td><td><input class="input_box" type="number", name="G7", id="G7", max="9", value="7"></td><td><input class="input_box" type="number", name="G8", id="G8", max="9", value="1"></td>
+                <tr> <td><input class="input_box" type="number", name="H0", id="H0", max="9"></td> <td><input class="input_box" type="number", name="H1", id="H1", max="9", value="1"></td><td><input class="input_box" type="number", name="H2", id="H2", max="9"></td><td><input class="input_box" type="number", name="H3", id="H3", max="9"></td><td><input class="input_box" type="number", name="H4", id="H4", max="9", value="2"></td><td><input class="input_box" type="number", name="H5", id="H5", max="9"></td><td><input class="input_box" type="number", name="H6", id="H6", max="9"></td><td><input class="input_box" type="number", name="H7", id="H7", max="9", value="3"></td><td><input class="input_box" type="number", name="H8", id="H8", max="9", value="6"></td>
+                <tr> <td><input class="input_box" type="number", name="I0", id="I0", max="9", value="7"></td> <td><input class="input_box" type="number", name="I1", id="I1", max="9"></td><td><input class="input_box" type="number", name="I2", id="I2", max="9", value="3"></td><td><input class="input_box" type="number", name="I3", id="I3", max="9"></td><td><input class="input_box" type="number", name="I4", id="I4", max="9", value="4"></td><td><input class="input_box" type="number", name="I5", id="I5", max="9", value="8"></td><td><input class="input_box" type="number", name="I6", id="I6", max="9"></td><td><input class="input_box" type="number", name="I7", id="I7", max="9"></td><td><input class="input_box" type="number", name="I8", id="I8", max="9"></td>
+            </table>
+        </div>
+        
+        <!-- Submit Button -->
+        <input type="Submit" class="btn", onclick="get_input()">
+
+    </form>
+
+    <form class="grid", action="/generate_board", method="POST">
+        <input type="Submit", class="btn", value="Generate Board", onclick="generate_board()">
+    </form>
+
+    <footer class="footer">
+        <div class="footer_child">
+            <p class="footer_title">Sean Balakhanei</p>
+            <ul class="social-list">
+                <li class="social-list__item">
+                    <a class="social-list__link" href="https://seanbalakhanei.me">
+                        <i class="fa-solid fa-code"></i>
+                    </a>
+                </li>
+                <li class="social-list__item">
+                    <a class="social-list__link" href="https://www.linkedin.com/in/seanbalakhanei/">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </li>
+                <li class="social-list__item">
+                    <a class="social-list__link" href="https://github.com/sean-balks">
+                        <i class="fab fa-github"></i>
+                    </a>
+                </li>
+                <li class="social-list__item">
+                    <a class="social-list__link" href="mailto:sb7671@nyu.edu">
+                        <i class="fa-solid fa-envelope"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="footer_child">
+            <p class="footer_title">Shubh Savani</p>
+            <ul class="social-list">
+                <li class="social-list__item">
+                    <a class="social-list__link" href="https://www.linkedin.com/in/shubh-s-3106a5173">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </li>
+                <li class="social-list__item">
+                    <a class="social-list__link" href="https://github.com/Shubh587">
+                        <i class="fab fa-github"></i>
+                    </a>
+                </li>
+                <li class="social-list__item">
+                    <a class="social-list__link" href="mailto:sms9977@nyu.edu">
+                        <i class="fa-solid fa-envelope"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </footer>
+
+</html>
