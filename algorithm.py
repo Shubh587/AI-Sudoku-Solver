@@ -661,56 +661,56 @@ def backtracking_search(csp):
     return backtrack(csp, assignment)
 
 
-def main():
-    # Get the input file from the cmd command
-    parser = argparse.ArgumentParser(description='Solve Sudoku Puzzle with Backtracking Algorithm '
-                                                 'with MRV/degree heuristics and RGB order')
-    parser.add_argument('filename', help='The input file containing the initial and goal state')
-    cmdline = parser.parse_args()
-    file_name = cmdline.filename
-
-    # Parses the file and creates a 2D array that stores each cell as an int value and handles error inputs
-    sudoku_puzzle = file_reader(file_name)
-
-    # Outputs the sudoku problem (before it is solved) to the terminal
-    print("Input: ")
-    print_puzzle(sudoku_puzzle)
-    print()
-
-    # Checks if the initial puzzle given is viable
-    if is_viable(sudoku_puzzle):
-        # Creates the constraint solve problem given the sudoku puzzle array
-        csp = CSP(sudoku_puzzle)
-        # Removes invalid domain values that conflict with assigned variables from each unassigned variable
-        csp.eliminate_domain_values()
-
-        # Send the csp into the backtracking search algorithm to get solved
-        solution = backtracking_search(csp)
-        is_success = solution[0]
-
-        # outputs entire puzzle as a 1D array for the HTML program to process and output to the user
-        assignment = solution[1]
-        output = convert_1D_array(sudoku_puzzle, assignment, is_success)
-    else:
-        output = [-1] * 81
-    print(output)
-
-    # if is_viable(sudoku_puzzle):
-    #     csp = CSP(sudoku_puzzle)
-    #     csp.eliminate_domain_values()
-    #     solution = backtracking_search(csp)
-    #     is_success = solution[0]
-    #
-    #     if is_success:  # checks if the puzzle was solvable
-    #         assignment = solution[1]
-    #         write_output_file(file_name, sudoku_puzzle, assignment)  # writes the output file with the solved puzzle
-    #     else:  # the puzzle was not solvable given the user inputs
-    #         print("Failure. Puzzle is not solvable.")
-    # else:
-    #     print("Failure. Puzzle is not solvable.")
-
-
-if __name__ == "__main__":
-    main()
+# def main():
+#     # Get the input file from the cmd command
+#     parser = argparse.ArgumentParser(description='Solve Sudoku Puzzle with Backtracking Algorithm '
+#                                                  'with MRV/degree heuristics and RGB order')
+#     parser.add_argument('filename', help='The input file containing the initial and goal state')
+#     cmdline = parser.parse_args()
+#     file_name = cmdline.filename
+#
+#     # Parses the file and creates a 2D array that stores each cell as an int value and handles error inputs
+#     sudoku_puzzle = file_reader(file_name)
+#
+#     # Outputs the sudoku problem (before it is solved) to the terminal
+#     print("Input: ")
+#     print_puzzle(sudoku_puzzle)
+#     print()
+#
+#     # Checks if the initial puzzle given is viable
+#     if is_viable(sudoku_puzzle):
+#         # Creates the constraint solve problem given the sudoku puzzle array
+#         csp = CSP(sudoku_puzzle)
+#         # Removes invalid domain values that conflict with assigned variables from each unassigned variable
+#         csp.eliminate_domain_values()
+#
+#         # Send the csp into the backtracking search algorithm to get solved
+#         solution = backtracking_search(csp)
+#         is_success = solution[0]
+#
+#         # outputs entire puzzle as a 1D array for the HTML program to process and output to the user
+#         assignment = solution[1]
+#         output = convert_1D_array(sudoku_puzzle, assignment, is_success)
+#     else:
+#         output = [-1] * 81
+#     print(output)
+#
+#     # if is_viable(sudoku_puzzle):
+#     #     csp = CSP(sudoku_puzzle)
+#     #     csp.eliminate_domain_values()
+#     #     solution = backtracking_search(csp)
+#     #     is_success = solution[0]
+#     #
+#     #     if is_success:  # checks if the puzzle was solvable
+#     #         assignment = solution[1]
+#     #         write_output_file(file_name, sudoku_puzzle, assignment)  # writes the output file with the solved puzzle
+#     #     else:  # the puzzle was not solvable given the user inputs
+#     #         print("Failure. Puzzle is not solvable.")
+#     # else:
+#     #     print("Failure. Puzzle is not solvable.")
+#
+#
+# if __name__ == "__main__":
+#     main()
 
 # ra0Eequ6ucie6Jei0koh6phishohm9
