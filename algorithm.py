@@ -1,8 +1,11 @@
 #!/usr/bin/python3
 # Developer: Shubh Savani
 
-import argparse  # so we can parse the command line
+import argparse  # so we can parse
+# the command line
 import sys  # so we can write the output file
+import queue  # used to keep track of all the arcs in the AC-3 algo (in CSP class)
+import time  # to see how long it takes for the algorithm to solve a problem
 
 
 # Variable Class
@@ -166,6 +169,9 @@ class ConstraintCollection:  # holds all the constraints in the CSP
                 if var2 == const_var:
                     return True
         return False
+
+    def __len__(self):
+        return len(self.constraints)
 
 
 class Assignment:  # manages the list of assignments given to each variable during the backtracking algorithm search
@@ -624,7 +630,49 @@ def is_viable(puzzle):
 #     return False, assignment  # if none of the domain values are consistent with the past variable assignments
 #
 
+def revise(csp, var1, var2):
+    revised = False
+    for var1_val in var1.get_domain():
+        is_satisfied = False
+        for var2_val in var2.get_domain():
+            if var2_val != var1_val:
+                is_satisfied = True
+        if not is_satisfied:  # no value in var2's domain satisfies the constraint between var1 and var2
+            # given var1 = var1_val
+            # delete var1_val from var 1's domain
+            var1.prune_domain(var1_val)
+            revised = True
+    return revised
+
+
+def ac_3(csp):  # Preprocessing arc-consistency algorithm to see if every arc is arc-consistent
+    # or if some variables have empty domains
+    # Create a Queue object that will initially store all the arcs in csp
+    arc_container = queue.Queue()
+    constraints = csp.get_constraint_collection()
+    for constraint_ind in range(len(constraints)):
+        arc_container.put(constraints.get_collection()[constraint_ind])  # queues up the container with all the
+        # constraints in csp
+
+    while not arc_container.empty():
+        removed_arc = arc_container.get()  # pops first constraint out of the queue
+        constraint_vars = removed_arc.get_variables()
+        var1 = constraint_vars[0]
+        var2 = constraint_vars[1]
+        if revise(csp, var1, var2):
+            if len(var1.get_domain()) == 0:
+                return False
+            var_constraints = csp.get_constraint_collection().find_var_constraints(var1)
+            for ind in range(len(var_constraints)):
+                arc_container.put(var_constraints[ind])
+    return True
+
+
 def backtrack(csp, assignment):
+    curr_time = time.perf_counter()
+    if curr_time >= 120:
+        print("Program took too long to run")
+        sys.exit()  # scrap the program if the algorithm takes more than 2 minutes to run
     if len(assignment) == len(csp):  # checks if the assignment is complete
         return True, assignment
     var = csp.select_unassigned_var()
@@ -661,56 +709,67 @@ def backtracking_search(csp):
     return backtrack(csp, assignment)
 
 
-# def main():
-#     # Get the input file from the cmd command
-#     parser = argparse.ArgumentParser(description='Solve Sudoku Puzzle with Backtracking Algorithm '
-#                                                  'with MRV/degree heuristics and RGB order')
-#     parser.add_argument('filename', help='The input file containing the initial and goal state')
-#     cmdline = parser.parse_args()
-#     file_name = cmdline.filename
-#
-#     # Parses the file and creates a 2D array that stores each cell as an int value and handles error inputs
-#     sudoku_puzzle = file_reader(file_name)
-#
-#     # Outputs the sudoku problem (before it is solved) to the terminal
-#     print("Input: ")
-#     print_puzzle(sudoku_puzzle)
-#     print()
-#
-#     # Checks if the initial puzzle given is viable
-#     if is_viable(sudoku_puzzle):
-#         # Creates the constraint solve problem given the sudoku puzzle array
-#         csp = CSP(sudoku_puzzle)
-#         # Removes invalid domain values that conflict with assigned variables from each unassigned variable
-#         csp.eliminate_domain_values()
-#
-#         # Send the csp into the backtracking search algorithm to get solved
-#         solution = backtracking_search(csp)
-#         is_success = solution[0]
-#
-#         # outputs entire puzzle as a 1D array for the HTML program to process and output to the user
-#         assignment = solution[1]
-#         output = convert_1D_array(sudoku_puzzle, assignment, is_success)
-#     else:
-#         output = [-1] * 81
-#     print(output)
-#
-#     # if is_viable(sudoku_puzzle):
-#     #     csp = CSP(sudoku_puzzle)
-#     #     csp.eliminate_domain_values()
-#     #     solution = backtracking_search(csp)
-#     #     is_success = solution[0]
-#     #
-#     #     if is_success:  # checks if the puzzle was solvable
-#     #         assignment = solution[1]
-#     #         write_output_file(file_name, sudoku_puzzle, assignment)  # writes the output file with the solved puzzle
-#     #     else:  # the puzzle was not solvable given the user inputs
-#     #         print("Failure. Puzzle is not solvable.")
-#     # else:
-#     #     print("Failure. Puzzle is not solvable.")
-#
-#
-# if __name__ == "__main__":
-#     main()
+def main():
+    # Get the input file from the cmd command
+    parser = argparse.ArgumentParser(description='Solve Sudoku Puzzle with Backtracking Algorithm '
+                                                 'with MRV/degree heuristics and RGB order')
+    parser.add_argument('filename', help='The input file containing the initial and goal state')
+    cmdline = parser.parse_args()
+    file_name = cmdline.filename
+
+    # Parses the file and creates a 2D array that stores each cell as an int value and handles error inputs
+    sudoku_puzzle = file_reader(file_name)
+
+    # Outputs the sudoku problem (before it is solved) to the terminal
+    print("Input: ")
+    print_puzzle(sudoku_puzzle)
+    print()
+
+    # Checks if the initial puzzle given is viable
+    # if is_viable(sudoku_puzzle):
+    #     # Creates the constraint solve problem given the sudoku puzzle array
+    #     csp = CSP(sudoku_puzzle)
+    #     # Removes invalid domain values that conflict with assigned variables from each unassigned variable
+    #     csp.eliminate_domain_values()
+    #
+    #     # Send the csp into the backtracking search algorithm to get solved
+    #     solution = backtracking_search(csp)
+    #     is_success = solution[0]
+    #
+    #     # outputs entire puzzle as a 1D array for the HTML program to process and output to the user
+    #     assignment = solution[1]
+    #     output = convert_1D_array(sudoku_puzzle, assignment, is_success)
+    # else:
+    #     output = [-1] * 81
+    # print(output)
+    start = time.perf_counter()  # start the timer
+
+    if is_viable(sudoku_puzzle):
+        csp = CSP(sudoku_puzzle)
+        csp.eliminate_domain_values()
+        is_arc_consistent = ac_3(csp)
+        if is_arc_consistent:
+            solution = backtracking_search(csp)
+            is_success = solution[0]
+
+            if is_success:  # checks if the puzzle was solvable
+                assignment = solution[1]
+                # write_output_file(file_name, sudoku_puzzle, assignment)  # writes the output file with the solved
+                # puzzle
+                apply_solution(sudoku_puzzle, assignment)
+            else:  # the puzzle was not solvable given the user inputs
+                print("Failure. Puzzle is not solvable.")
+        else:
+            print("Failure. Puzzle is not solvable.")
+    else:
+        print("Failure. Puzzle is not solvable.")
+
+    end = time.perf_counter()  # end the timer
+    diff_time = end - start  # take the difference in time
+    print("Time to run algorithm: ", diff_time)
+
+
+if __name__ == "__main__":
+    main()
 
 # ra0Eequ6ucie6Jei0koh6phishohm9
