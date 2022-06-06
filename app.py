@@ -1,7 +1,7 @@
 #Dev: Sean Balakhanei
 
 from flask import Flask, render_template, redirect, request, url_for
-import algorithm
+import algorithm_revised, random
 
 app = Flask(__name__)
 
@@ -31,12 +31,7 @@ def get_input():
                 input[j][i] = 0
             input[j][i] = int(input[j][i])
 
-    # Creating CSP object and calling backtracking algo
-    csp = algorithm.CSP(input)
-    csp.eliminate_domain_values()
-    assignment = algorithm.backtracking_search(csp)[1]
-    isSuccess = algorithm.backtracking_search(csp)[0]
-    solution = algorithm.convert_1D_array(input, assignment, isSuccess)
+    solution = algorithm_revised.solve(input)
 
     # If a solution exists, display it. Otherwise, the input is invalid.
     if solution[0] != -1:
@@ -49,10 +44,99 @@ def start_again():
     return render_template("index.html")
 
 # Display a computer generated board to be solved
-# Not finished yet, so in the meantime it will display 1 hand chosen board for the comptuer to solve
+# 25% of the time, the board will be generated randomly (odds are there will be no solution)
+# To make this function more practical, 75% of the time a solvable Sudoku puzzle will be displayed
+
+# Note: Given that generating solvable Sudoku puzzles is np complete, the solvable puzzles output by
+# the "Generate Puzzle" function will be manually selected from several pre-defined puzzles
 @app.route("/generate_board", methods=["POST"])
 def generate_board():
-    #input = [-1]*81
+    input = ['1']*81
+    num = random.randint(1, 4)
+    if num == 1:
+        # On average we're going to fill 3-4 boxes in each column with numbers 1-9
+        # There may be overlap if the same position is selected twice, but it's not a big deal
+        # Since the number of boxes is constant, O(1) time & space
+        input = [0]*81
+        for i in range(32):
+            position = random.randint(0, 80)
+            num = random.randint(1, 9)
+            input[position] = num
+    else:
+        puzzle_number = random.randint(1, 4)
+        if puzzle_number == 1:
+            # Self-made puzzle
+            input =[0,0,0,5,6,0,7,0,4,
+                    6,8,0,0,7,0,0,9,0,
+                    4,9,0,0,0,1,2,0,0,
+                    8,5,0,4,0,0,0,1,0,
+                    0,0,1,6,0,5,9,0,0,
+                    0,2,0,0,0,3,0,5,8,
+                    0,0,9,3,0,0,0,7,1,
+                    0,1,0,0,2,0,0,3,6,
+                    7,0,3,0,4,8,0,0,0]
+        elif puzzle_number == 2:
+            # Easy puzzle from Sudoku.com
+            input = [0,3,4,7,0,6,0,0,0,
+                     0,0,0,0,5,0,2,0,0,
+                     7,5,0,0,0,0,0,0,4,
+                     9,7,0,2,6,1,0,4,8,
+                     3,8,2,0,4,7,0,5,1,
+                     0,0,6,0,0,0,0,9,2,
+                     0,0,3,0,0,0,0,0,7,
+                     8,0,0,5,0,2,4,0,0,
+                     0,0,0,0,7,9,8,0,6]
+        elif puzzle_number == 3:
+            # Medium puzzle from Sudoku.com
+            input = [7,0,8,0,0,1,4,0,0,
+                     3,0,0,4,0,0,0,0,0,
+                     0,9,4,5,0,0,0,7,6,
+                     2,7,0,6,0,8,0,0,0,
+                     6,0,3,0,0,0,7,0,2,
+                     0,0,0,7,0,0,1,6,0,
+                     0,0,0,0,5,4,0,0,1,
+                     4,1,5,0,0,0,8,2,7,
+                     0,0,0,0,0,0,0,0,4]
+        elif puzzle_number == 4:
+            # Hard puzzle from Sudoku.com
+            input = [3,0,0,0,0,8,0,0,2,
+                     0,0,7,5,0,0,0,0,4,
+                     0,0,0,0,0,0,9,6,0,
+                     4,0,0,0,0,1,0,0,3,
+                     0,9,0,0,0,5,0,4,0,
+                     9,0,0,6,0,0,0,0,0,
+                     0,3,0,7,0,0,2,0,6,
+                     8,0,0,2,0,0,0,0,5]
+        elif puzzle_number == 5:
+            # Expert puzzle from Sudoku.com
+            input = [0,3,0,1,0,0,4,0,0,
+                     0,0,6,0,0,0,0,5,3,
+                     0,0,0,0,0,6,0,0,0,
+                     9,0,4,0,0,0,5,0,0,
+                     2,0,0,0,3,0,0,0,9,
+                     0,0,0,0,4,0,8,0,0,
+                     0,2,0,7,0,0,0,8,0,
+                     5,0,0,9,2,8,0,0,0,
+                     0,0,0,0,0,0,0,6,0]
+        elif puzzle_number == 6:
+            # Evil problem from Sudoku.com
+            input = [0,0,0,0,4,0,0,0,0,
+                     0,0,3,9,8,0,2,0,0,
+                     0,2,0,0,0,0,0,0,7,
+                     0,0,0,0,0,4,9,0,0,
+                     0,0,1,0,0,7,0,0,0,
+                     8,0,0,1,9,0,0,0,6,
+                     6,0,0,0,0,0,0,5,0,
+                     0,0,0,0,0,1,0,0,0,
+                     0,0,8,3,2,0,7,0,0]
+
+    # "Clean" data for HTML
+    for i in range(len(input)):
+        if input[i] <= 0:
+            input[i] = ''
+        else:
+            input[i] = str(input[i])
+
     return render_template("index_generated.html", input=input)
 
 if __name__ == "__main__":
