@@ -1,5 +1,6 @@
 # Developer: Shubh Savani
 # Designer of Backtracking Algorithm Implementation: Dante Sblendorio
+
 import time
 import numpy as np
 import pandas as pd
@@ -78,7 +79,23 @@ def checkGrids(r, c, sudoku_puzzle, n):
     return subgrid
 
 
-def solve(sudoku_puzzle, puzzle_values):
+def convert_2_1D_list(output_arr):
+    output = []
+    for row in range(len(output_arr)):
+        for col in range(len(output_arr[row])):
+            output.append(int(output_arr[row][col]))
+    return output
+
+
+def solve(input_arr):  # edited original function to take in a 2D input list instead of a numPy array of the input puzzle and a numPy array of possible values
+    sudoku_puzzle = np.empty((0, 9), int)
+    for row_ind in range(len(input_arr)):
+        row_values = input_arr[row_ind]
+        row_arr = np.array([])
+        for value in row_values:
+            row_arr = np.append(row_arr, [value])
+        sudoku_puzzle = np.append(sudoku_puzzle, [row_arr], axis=0)
+    puzzle_values = determineValues(sudoku_puzzle)
     count = 0
     solution = False
     rows = np.array(np.where(sudoku_puzzle == 0))[0]
@@ -114,9 +131,29 @@ def solve(sudoku_puzzle, puzzle_values):
             sudoku_puzzle[r, c] = 0
             dic[count] = 0
             count -= 1
+    output = convert_2_1D_list(sudoku_puzzle)  # converts output to a 1D list for the website to take in
+    return output
 
 
-def file_reader(file_name):
+# def file_reader(file_name):
+#     puzzle = []
+#     file = open(file_name)
+#     valid_inputs = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+#     for ind in range(9):
+#         line = file.readline()
+#         row = line.split()
+#         puzzle.append(row)
+#     #  convert each value in puzzle from a string to an integer
+#     for row in range(len(puzzle)):
+#         for col in range(len(puzzle[row])):
+#             val_str = puzzle[row][col]
+#             if val_str not in valid_inputs:
+#                 raise ValueError("Input must be an integer from 0 to 9")
+#             puzzle[row][col] = int(val_str)
+#     input_array = np.array([puzzle[0], puzzle[1], puzzle[2], puzzle[3], puzzle[4], puzzle[5], puzzle[6], puzzle[7], puzzle[8]])
+#     return input_array
+
+def file_reader(file_name):  # takes the input from the command line, takes in the file from the directory, reads the file and checks if there are any invalid inputs
     puzzle = []
     file = open(file_name)
     valid_inputs = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
@@ -131,8 +168,8 @@ def file_reader(file_name):
             if val_str not in valid_inputs:
                 raise ValueError("Input must be an integer from 0 to 9")
             puzzle[row][col] = int(val_str)
-    input_array = np.array([puzzle[0], puzzle[1], puzzle[2], puzzle[3], puzzle[4], puzzle[5], puzzle[6], puzzle[7], puzzle[8]])
-    return input_array
+
+    return puzzle
 
 
 def main():
@@ -150,15 +187,16 @@ def main():
     # sudoku_puzzle_2 = np.array([[7, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 4, 0, 0, 0, 3, 0, 0], [0, 3, 0, 5, 2, 1, 0, 0, 9],
     #                           [0, 0, 8, 1, 0, 5, 0, 3, 0], [4, 0, 0, 0, 9, 0, 0, 0, 7], [0, 1, 0, 3, 0, 4, 5, 0, 0],
     #                           [6, 0, 0, 7, 3, 8, 0, 1, 0], [0, 0, 1, 0, 0, 0, 2, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 3]])
-    sudoku_puzzle = file_reader(file_name)
+    # sudoku_puzzle = file_reader(file_name)
+    input_arr = file_reader(file_name)
     # sudoku_df = pd.DataFrame(pd.read_csv('sudoku.csv', nrows=100))  # imports first 100 puzzles and solutions
     # # for training/testing
     # shaped_puzzles = shape_puzzles(sudoku_df)
     start = time.perf_counter()
-    puzzle_vals = determineValues(sudoku_puzzle)
-    print(solve(sudoku_puzzle, puzzle_vals))
+    # puzzle_vals = determineValues(sudoku_puzzle)
+    print(solve(input_arr))
     end = time.perf_counter()
-    total_time  = end - start
+    total_time = end - start
     print("Runtime: ", total_time)
     # print(puzzle_vals)
     # print(shaped_puzzles.iloc[0, 0])
