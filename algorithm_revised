@@ -1,9 +1,9 @@
-# Developer: Shubh Savani
+# Developer: Shubh Savani (Added additional functions that adjusted the solve function to take in an 2D input list and output a 1D list 
+# for the website to print out. Also, added functions to check if the inital puzzle is viable before solving)
 # Designer of Backtracking Algorithm Implementation: Dante Sblendorio
 
 import time
 import numpy as np
-import pandas as pd
 import argparse
 
 
@@ -32,9 +32,9 @@ def checkPuzzle(sudoku_puzzle):
 
     solved = all([checkRow, checkCol, checkUpperLeft, checkUpperMid, checkUpperRight,
                   checkMidLeft, checkMidMid, checkMidRight, checkLowerLeft, checkLowerMid, checkLowerRight])
-    if solved:
-        for line in sudoku_puzzle:
-            print(*line)
+    # if solved:
+    #     for line in sudoku_puzzle:
+    #         print(*line)
     return solved
 
 
@@ -87,15 +87,115 @@ def convert_2_1D_list(output_arr):
     return output
 
 
-def solve(input_arr):  # edited original function to take in a 2D input list instead of a numPy array of the input puzzle and a numPy array of possible values
-    sudoku_puzzle = np.empty((0, 9), int)
-    for row_ind in range(len(input_arr)):
+def parse_rows(puzzle):
+    rows = {}
+    for row in range(len(puzzle)):
+        rows[row] = [puzzle[row][col] for col in range(len(puzzle[row])) if puzzle[row][col] != 0]
+    return rows
+
+
+def parse_cols(puzzle):
+    cols = {}
+    for col in range(len(puzzle)):
+        cols[col] = [puzzle[row][col] for row in range(len(puzzle[col])) if puzzle[row][col] != 0]
+    return cols
+
+
+def parse_blocks(puzzle):
+    blocks = {0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: []}
+    for row in range(len(puzzle)):
+        for col in range(len(puzzle[row])):
+            value = puzzle[row][col]
+            if value != 0:
+                block_num = None
+                if 0 <= row <= 2:
+                    if 0 <= col <= 2:
+                        block_num = 0
+                    elif 3 <= col <= 5:
+                        block_num = 1
+                    elif 6 <= col <= 8:
+                        block_num = 2
+                elif 3 <= row <= 5:
+                    if 0 <= col <= 2:
+                        block_num = 3
+                    elif 3 <= col <= 5:
+                        block_num = 4
+                    elif 6 <= col <= 8:
+                        block_num = 5
+                else:
+                    if 0 <= col <= 2:
+                        block_num = 6
+                    elif 3 <= col <= 5:
+                        block_num = 7
+                    elif 6 <= col <= 8:
+                        block_num = 8
+                blocks[block_num].append(value)
+    return blocks
+
+
+def given_enough_clues(puzzle):
+    num_clues = 0
+    for row in range(len(puzzle)):
+        for col in range(len(puzzle[row])):
+            value = puzzle[row][col]
+            if value != 0:
+                num_clues += 1
+    if 0 <= num_clues <= 16:
+        return False
+    return True
+
+
+def is_viable(puzzle):
+    if not given_enough_clues(puzzle):  # check if there are enough clues given for the algo to solve
+        return False
+    rows = parse_rows(puzzle)
+    cols = parse_cols(puzzle)
+    blocks = parse_blocks(puzzle)
+
+    # check every unit to make sure there are no invalid inputs
+    for row_ind in rows.keys():
+        row = rows[row_ind]
+        row.sort()
+        for ind in range(len(row) - 1):
+            curr_val = row[ind]
+            next_val = row[ind + 1]
+            if curr_val == next_val:
+                return False
+    for col_ind in cols.keys():
+        col = cols[col_ind]
+        col.sort()
+        for ind in range(len(col) - 1):
+            curr_val = col[ind]
+            next_val = col[ind + 1]
+            if curr_val == next_val:
+                return False
+    for block_ind in blocks.keys():
+        block = blocks[block_ind]
+        block.sort()
+        for ind in range(len(block) - 1):
+            curr_val = block[ind]
+            next_val = block[ind + 1]
+            if curr_val == next_val:
+                return False
+    return True
+
+
+def solve(input_arr):
+    # Added a section that checks if the given puzzle is even viable (before solving) -
+    # saves time by not solving puzzles we know will be invalid based on given clues
+    if not is_viable(input_arr):
+        output = [-1] * 81
+        return output
+    sudoku_puzzle = np.empty((0, 9), int)  # set the sudoku puzzle to be an empty row that can be
+    # added onto using numPy append method
+    for row_ind in range(len(input_arr)):  # adds rows to numPy array from input array
         row_values = input_arr[row_ind]
         row_arr = np.array([])
         for value in row_values:
             row_arr = np.append(row_arr, [value])
         sudoku_puzzle = np.append(sudoku_puzzle, [row_arr], axis=0)
-    puzzle_values = determineValues(sudoku_puzzle)
+    puzzle_values = determineValues(sudoku_puzzle)  # determines viable values from the sudoku_puzzle array
+
     count = 0
     solution = False
     rows = np.array(np.where(sudoku_puzzle == 0))[0]
@@ -131,8 +231,13 @@ def solve(input_arr):  # edited original function to take in a 2D input list ins
             sudoku_puzzle[r, c] = 0
             dic[count] = 0
             count -= 1
-    output = convert_2_1D_list(sudoku_puzzle)  # converts output to a 1D list for the website to take in
-    return output
+
+    is_solved = checkPuzzle(sudoku_puzzle) # checks if the puzzle has a valid solution
+    if is_solved:
+        output = convert_2_1D_list(sudoku_puzzle)
+    else:
+        output = [-1] * 81
+    return output  # returns 1D array of values for the website to process (in app.py)
 
 
 # def file_reader(file_name):
@@ -153,7 +258,7 @@ def solve(input_arr):  # edited original function to take in a 2D input list ins
 #     input_array = np.array([puzzle[0], puzzle[1], puzzle[2], puzzle[3], puzzle[4], puzzle[5], puzzle[6], puzzle[7], puzzle[8]])
 #     return input_array
 
-def file_reader(file_name):  # takes the input from the command line, takes in the file from the directory, reads the file and checks if there are any invalid inputs
+def file_reader(file_name):
     puzzle = []
     file = open(file_name)
     valid_inputs = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
