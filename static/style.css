@@ -36,7 +36,14 @@ colgroup, tbody {
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     font-size: 2em;
     margin-top: .2em;
+    margin-bottom: .2em;
+}
+
+.difficulty {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-size: 1em;
     margin-bottom: .4em;
+    color: var(--main-color);
 }
 
 td { 
