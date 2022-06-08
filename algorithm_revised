@@ -184,7 +184,7 @@ def solve(input_arr):
     # Added a section that checks if the given puzzle is even viable (before solving) -
     # saves time by not solving puzzles we know will be invalid based on given clues
     if not is_viable(input_arr):
-        output = [-1] * 81
+        output = [-2] * 81
         return output
     sudoku_puzzle = np.empty((0, 9), int)  # set the sudoku puzzle to be an empty row that can be
     # added onto using numPy append method
