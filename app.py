@@ -4,13 +4,14 @@ from flask import Flask, render_template, redirect, request, url_for
 import algorithm_revised, random
 
 app = Flask(__name__)
-
+difficulty = []
 @app.route("/")
 def index():
     return render_template("index.html")
 
 @app.route("/solve", methods=["POST", "GET"])
 def get_input():
+    global difficulty
     # Creating matrix of spots algorithmically
     input = [[]]*9
     spots = [[]]*9
@@ -33,11 +34,15 @@ def get_input():
 
     solution = algorithm_revised.solve(input)
 
+    # If the board is user input, we cannot determine the difficulty
+    if len(difficulty) == 0:
+        difficulty = ["N/A", "black"]
+
     # If a solution exists, display it. Otherwise, the input is invalid.
     if solution[0] != -1:
-        return render_template("solve.html", solution=solution)
+        return render_template("solve.html", solution=solution, difficulty=difficulty)
     else:
-        return render_template("unsolvable.html", solution=solution)
+        return render_template("unsolvable.html", solution=solution, difficulty=difficulty)
 
 # Back to home page when user wants to input a new puzzle
 def start_again():
@@ -51,21 +56,24 @@ def start_again():
 # the "Generate Puzzle" function will be manually selected from several pre-defined puzzles
 @app.route("/generate_board", methods=["POST"])
 def generate_board():
+    global difficulty
     input = ['1']*81
     num = random.randint(1, 4)
     if num == 1:
         # On average we're going to fill 3-4 boxes in each column with numbers 1-9
         # There may be overlap if the same position is selected twice, but it's not a big deal
         # Since the number of boxes is constant, O(1) time & space
+        difficulty = ["Random", "black"]
         input = [0]*81
         for i in range(32):
             position = random.randint(0, 80)
             num = random.randint(1, 9)
             input[position] = num
     else:
-        puzzle_number = random.randint(1, 4)
+        puzzle_number = random.randint(1, 5)
         if puzzle_number == 1:
-            # Self-made puzzle
+            # Self-made puzzle (equivalent of Medium difficulty)
+            difficulty = ["Medium", "orange"]
             input =[0,0,0,5,6,0,7,0,4,
                     6,8,0,0,7,0,0,9,0,
                     4,9,0,0,0,1,2,0,0,
@@ -77,6 +85,7 @@ def generate_board():
                     7,0,3,0,4,8,0,0,0]
         elif puzzle_number == 2:
             # Easy puzzle from Sudoku.com
+            difficulty = ["Easy", "green"]
             input = [0,3,4,7,0,6,0,0,0,
                      0,0,0,0,5,0,2,0,0,
                      7,5,0,0,0,0,0,0,4,
@@ -88,6 +97,7 @@ def generate_board():
                      0,0,0,0,7,9,8,0,6]
         elif puzzle_number == 3:
             # Medium puzzle from Sudoku.com
+            difficulty = ["Medium", "orange"]
             input = [7,0,8,0,0,1,4,0,0,
                      3,0,0,4,0,0,0,0,0,
                      0,9,4,5,0,0,0,7,6,
@@ -99,16 +109,19 @@ def generate_board():
                      0,0,0,0,0,0,0,0,4]
         elif puzzle_number == 4:
             # Hard puzzle from Sudoku.com
-            input = [3,0,0,0,0,8,0,0,2,
-                     0,0,7,5,0,0,0,0,4,
-                     0,0,0,0,0,0,9,6,0,
-                     4,0,0,0,0,1,0,0,3,
-                     0,9,0,0,0,5,0,4,0,
-                     9,0,0,6,0,0,0,0,0,
-                     0,3,0,7,0,0,2,0,6,
-                     8,0,0,2,0,0,0,0,5]
+            difficulty = ["Hard", "red"]
+            input = [0,9,0,0,0,0,0,6,0,
+                     0,0,7,0,1,5,0,4,0,
+                     0,0,4,6,0,3,1,0,0,
+                     0,0,0,0,0,0,0,2,0,
+                     9,0,0,0,5,0,0,0,3,
+                     0,7,6,0,0,0,0,5,0,
+                     0,0,0,0,3,2,6,0,0,
+                     0,1,0,5,0,0,0,3,0,
+                     0,5,0,7,0,4,2,0,9]
         elif puzzle_number == 5:
             # Expert puzzle from Sudoku.com
+            difficulty = ["Expert", "purple"]
             input = [0,3,0,1,0,0,4,0,0,
                      0,0,6,0,0,0,0,5,3,
                      0,0,0,0,0,6,0,0,0,
@@ -118,17 +131,6 @@ def generate_board():
                      0,2,0,7,0,0,0,8,0,
                      5,0,0,9,2,8,0,0,0,
                      0,0,0,0,0,0,0,6,0]
-        elif puzzle_number == 6:
-            # Evil problem from Sudoku.com
-            input = [0,0,0,0,4,0,0,0,0,
-                     0,0,3,9,8,0,2,0,0,
-                     0,2,0,0,0,0,0,0,7,
-                     0,0,0,0,0,4,9,0,0,
-                     0,0,1,0,0,7,0,0,0,
-                     8,0,0,1,9,0,0,0,6,
-                     6,0,0,0,0,0,0,5,0,
-                     0,0,0,0,0,1,0,0,0,
-                     0,0,8,3,2,0,7,0,0]
 
     # "Clean" data for HTML
     for i in range(len(input)):
@@ -137,7 +139,7 @@ def generate_board():
         else:
             input[i] = str(input[i])
 
-    return render_template("index_generated.html", input=input)
+    return render_template("index_generated.html", input=input, difficulty=difficulty)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000, host='0.0.0.0')
