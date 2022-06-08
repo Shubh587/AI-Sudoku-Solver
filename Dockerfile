@@ -1,5 +1,5 @@
 # Set base image (host OS)
-FROM python:3.8-alpine
+FROM python:3.8
 
 # By default, listen on port 5000
 EXPOSE 5000/tcp
@@ -7,22 +7,11 @@ EXPOSE 5000/tcp
 # Set the working directory in the container
 WORKDIR /Sudoku_Solver
 
-# Get packages for requirements.txt
-RUN apk add --no-cache --update \
-    python3-dev gcc \
-    gfortran musl-dev g++ \
-    libffi-dev openssl-dev \
-    libxml2 libxml2-dev \
-    libxslt libxslt-dev \
-    libjpeg-turbo-dev zlib-dev \
-    libpq postgresql-dev 
-
-RUN pip install --upgrade cython
-
-RUN pip install --upgrade pip
-
 # Copy the dependencies file to the working directory
 COPY requirements.txt .
+
+# Install pip
+#RUN apt-get install python3-pip
 
 # Install any dependencies
 RUN pip install -r requirements.txt
