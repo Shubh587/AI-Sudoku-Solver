@@ -38,14 +38,23 @@ def get_input():
     if len(difficulty) == 0:
         difficulty = ["N/A", "black"]
 
-    # If a solution exists, display it. Otherwise, the input is invalid.
-    if solution[0] != -1:
-        return render_template("solve.html", solution=solution, difficulty=difficulty)
+    # If a solution exists, display it.
+    # If the input puzzle is invalid, display Invalid Input
+    # If there puzzle is valid, but there is no solution, display No Solution
+    if solution[0] > 0:
+        x = difficulty
+        difficulty = []
+        return render_template("solve.html", solution=solution, difficulty=x)
     else:
-        return render_template("unsolvable.html", solution=solution, difficulty=difficulty)
+        type = "No Solution"
+        x = difficulty
+        difficulty = []
+        return render_template("unsolvable.html", solution=[-1]*81, difficulty=x, type=type)
 
 # Back to home page when user wants to input a new puzzle
 def start_again():
+    global difficulty
+    difficulty = []
     return render_template("index.html")
 
 # Display a computer generated board to be solved
@@ -70,7 +79,7 @@ def generate_board():
             num = random.randint(1, 9)
             input[position] = num
     else:
-        puzzle_number = random.randint(1, 5)
+        puzzle_number = random.randint(1, 8)
         if puzzle_number == 1:
             # Self-made puzzle (equivalent of Medium difficulty)
             difficulty = ["Medium", "orange"]
@@ -131,6 +140,42 @@ def generate_board():
                      0,2,0,7,0,0,0,8,0,
                      5,0,0,9,2,8,0,0,0,
                      0,0,0,0,0,0,0,6,0]
+        elif puzzle_number == 6:
+            # Expert puzzle from Sudoku.com
+            difficulty = ["Expert", "purple"]
+            input = [5,8,6,4,0,0,0,0,3,
+                     0,0,0,0,8,0,0,0,4,
+                     0,0,0,9,0,0,0,0,7,
+                     0,0,0,0,0,0,0,4,0,
+                     0,0,0,0,0,9,7,2,0,
+                     0,3,0,0,5,0,0,0,1,
+                     7,0,0,0,0,0,0,6,0,
+                     0,5,0,0,3,2,0,0,0,
+                     2,0,0,0,6,0,0,0,0]
+        elif puzzle_number == 7:
+            # Hard puzzle from Sudoku.com
+            difficulty = ["Hard", "red"]
+            input = [1,0,0,0,3,0,4,0,0,
+                     0,0,9,7,0,0,0,0,0,
+                     0,0,0,1,0,6,0,0,3,
+                     6,0,0,9,8,0,0,0,1,
+                     0,0,3,0,0,0,0,0,9,
+                     5,0,0,6,1,0,0,0,0,
+                     0,0,0,0,0,0,0,6,2,
+                     9,8,2,0,0,0,3,0,4,
+                     7,3,0,0,2,0,0,8,0]
+        elif puzzle_number == 8:
+            # Hard puzzle from Sudoku.com
+            difficulty = ["Easy", "green"]
+            input = [0,4,0,6,0,2,0,3,1,
+                     0,0,0,0,0,1,6,0,9,
+                     6,0,0,5,4,0,8,2,7,
+                     0,0,2,7,6,0,0,8,0,
+                     5,0,6,0,0,0,0,7,4,
+                     0,8,7,0,0,5,0,6,2,
+                     1,6,0,0,8,0,0,5,0,
+                     8,2,0,0,0,7,0,9,0,
+                     7,0,0,0,0,6,2,0,0]
 
     # "Clean" data for HTML
     for i in range(len(input)):
