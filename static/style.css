@@ -36,7 +36,7 @@ colgroup, tbody {
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     font-size: 2em;
     margin-top: .2em;
-    margin-bottom: .2em;
+    margin-bottom: .4em;
 }
 
 .difficulty {
@@ -92,6 +92,10 @@ td {
     text-transform: uppercase;
     letter-spacing: 1.5px;
     transition: transform 200ms ease-in-out;
+    width: 230px;
+
+    position: relative;
+    cursor: pointer;
 }
 
 .btn:hover{
@@ -112,6 +116,7 @@ td {
     text-transform: uppercase;
     letter-spacing: 1.5px;
     transition: transform 200ms ease-in-out;
+    width: 230px;
 }
 
 .btn_new_puzzle:hover{
@@ -132,6 +137,7 @@ td {
     text-transform: uppercase;
     letter-spacing: 1.5px;
     transition: transform 200ms ease-in-out;
+    width: 250px;
 }
 
 .btn_unsolvable:hover{
@@ -154,7 +160,7 @@ input[type="number"]
 .footer {
     text-align: center;
     padding: 2.5em 0;
-    margin-top: 2em;
+    margin-top: 1em;
     font-size: var(--fs-h3);
 }
 
