@@ -1,4 +1,4 @@
-# SudokuSolver
+# AI_Sudoku_Solver
 Link to Project: https://flasksudokusolver.com/
 
 Initial Implementation: Implements backtracking search algorithm using MRV and degree heuristics for the variable selection process to solve a given sudoku problem by the user. Algorithm's efficiency was improved by forward checking inferencing during search and AC-3 algorithm preprocessing prior to search.
