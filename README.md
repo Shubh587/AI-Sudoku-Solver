@@ -12,4 +12,5 @@ Runtime Test Procedure:
 2. Testing: Each puzzle in the data frame was tested on both of the algorithms (initial implementation and revised implementation), independently. The puzzle ID and the runtime were stored in a dictionary while the search algorithm was running.
 3. Analysis: The average runtime for each algorithm was taken. The percent change was calculated to be 1520%. 
 
-*Raw data in runtime_test folder 
+*Raw data in runtime_test folder
+*Note: We undertsand that the runtime for each puzzle will vary between computer to computer; however, the test was done to demonstrate the overall efficiency of the newer algorithm implementation.
