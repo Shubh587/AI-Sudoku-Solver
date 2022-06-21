@@ -15,3 +15,5 @@ Runtime Test Procedure:
 *Raw data in runtime_test folder
 
 *Note: We undertsand that the runtime for each puzzle will vary between computer to computer; however, the test was done to demonstrate the overall efficiency of the newer algorithm implementation.
+
+The frontend of the web app was developed in HTML and CSS, while the backend was developed using Python/Flask. The web app was hosted on GitHub pages and deployed using AWS.
